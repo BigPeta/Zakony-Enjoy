@@ -39,7 +39,7 @@
 
     /* --- ROZVRŽENÍ ZÁLOŽEK --- */
     .container { display:flex; flex: 1; overflow: hidden;}
-    .sidebar { width: 340px; background: #111827; padding: 20px; border-right: 2px solid #1e293b; overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;}
+    .sidebar { width: 400px; background: #111827; padding: 20px; border-right: 2px solid #1e293b; overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;}
     .main { flex: 1; padding: 20px; overflow-y: auto; position: relative; background: #0b1119;}
 
     /* --- MAPA --- */
@@ -72,8 +72,13 @@
     .law-desc { font-size: 12px; color: #cbd5e1; line-height: 1.4;}
     .law-source { font-size: 11px; color: #60a5fa; margin-top: 8px; font-weight: bold;}
 
-    .pdf-btn { background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 8px; width: 100%; text-align: left; border-radius: 4px; cursor: pointer; margin-bottom: 4px; font-size: 12px;}
+    .pdf-btn { background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 8px; width: 100%; text-align: left; border-radius: 4px; cursor: pointer; margin-bottom: 4px; font-size: 12px; transition: 0.2s;}
     .pdf-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+    
+    /* Kontejner pro zákony s posuvníkem */
+    .laws-scroll-container { display: flex; flex-direction: column; overflow-y: auto; max-height: 55vh; padding-right: 5px; }
+    .laws-scroll-container::-webkit-scrollbar { width: 6px; }
+    .laws-scroll-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -128,13 +133,14 @@
     </header>
 
     <div id="pdfSection" class="container" style="display: flex;">
-        <div class="sidebar" style="width: 400px;">
-            <input type="text" id="lawSearch" class="search-bar" placeholder="Hledat trestný čin (např. 'vydírání', 'nátlak', 'bouračka')..." oninput="renderLaws()">
-            <div id="lawResultsList">
-                </div>
+        <div class="sidebar">
+            <input type="text" id="lawSearch" class="search-bar" placeholder="Hledat trestný čin (např. 'vydírání')..." oninput="renderLaws()">
+            <div id="lawResultsList"></div>
+            
             <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase;">Příruční sbírka zákonů</h4>
-            <div id="manualPdfList">
+            <h4 style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase;">Kompletní sbírka zákonů</h4>
+            
+            <div id="manualPdfList" class="laws-scroll-container">
                 </div>
         </div>
         <div class="main" style="padding: 0;">
@@ -143,7 +149,7 @@
     </div>
 
     <div id="templatesSection" class="container">
-        <div class="sidebar">
+        <div class="sidebar" style="width: 340px;">
             <h3 style="margin-bottom: 15px;">Dostupné předtisky</h3>
             <select id="templateSelector" style="width: 100%; padding: 10px; background: #0f1720; color:white; border:1px solid #3b82f6; border-radius:6px; font-weight: bold;">
                 <option value="nesouhlas">Nesouhlas s trestem</option>
@@ -304,6 +310,8 @@ ${currentUser.rank} ${currentUser.fName} ${currentUser.lName}`;
 /* =========================================
    4. CHYTRÝ VYHLEDÁVAČ ZÁKONŮ (SMART ENGINE)
 ========================================= */
+
+// Ukázka databáze pro smart engine - můžeš si libovolně rozšiřovat
 const lawDatabase = [
     {
         title: "Vydírání",
@@ -342,11 +350,25 @@ const lawDatabase = [
     }
 ];
 
+// Kompletní seznam všech 17 zákonů dodaných uživatelem
 const manualPdfs = [
-    { name: "Ústava SA", url: "https://www.enjoyrp.cz/zakonnik/1-2001-Ústava%20San%20Andreaské%20republiky.pdf" },
-    { name: "Trestní zákoník", url: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf" },
-    { name: "Silniční provoz", url: "https://www.enjoyrp.cz/zakonnik/13-2001-Zákon%20o%20bezpečnosti%20a%20provozu%20na%20pozemních%20komunikacích.pdf" },
-    { name: "Drogy a OPL", url: "https://www.enjoyrp.cz/zakonnik/17-2001-Zákon%20o%20omamných%20a%20psychotropních%20látkách.pdf" }
+    { name: "Ústava San Andreaské republiky", url: "https://www.enjoyrp.cz/zakonnik/1-2001-Ústava%20San%20Andreaské%20republiky.pdf" },
+    { name: "Listina základních práv a svobod", url: "https://www.enjoyrp.cz/zakonnik/2-2001-Listina%20základních%20práv%20a%20svobod.pdf" },
+    { name: "Zákon o soudech a státním návladním", url: "https://www.enjoyrp.cz/zakonnik/3-2001-Zákon%20o%20soudech%20a%20úřadu%20státního%20návladního.pdf" },
+    { name: "Služební poměr bezp. sborů", url: "https://www.enjoyrp.cz/zakonnik/4-2001-Zákon%20o%20služebním%20poměru%20příslušníků%20bezpečnostních%20sborů.pdf" },
+    { name: "Občanský zákoník", url: "https://www.enjoyrp.cz/zakonnik/5-2026-Občanský%20zákoník.pdf" },
+    { name: "Zákon o zbraních a střelivu", url: "https://www.enjoyrp.cz/zakonnik/6-2026-Zákon%20o%20zbraních%20a%20střelivu.pdf" },
+    { name: "Zákon o LSFD", url: "https://www.enjoyrp.cz/zakonnik/7-2001-Zákon%20o%20Los%20Santos%20Fire%20Department.pdf" },
+    { name: "Zákon o SAMS a zdravotní péči", url: "https://www.enjoyrp.cz/zakonnik/8-2001-Zákon%20o%20správě%20San%20Andreas%20Medical%20Services%20a%20zdravotní%20péče%20občanům%20státu%20San%20Andreas.pdf" },
+    { name: "Zákon o námořní bezpečnosti", url: "https://www.enjoyrp.cz/zakonnik/9-2001-Zákon%20o%20námořní%20bezpečnosti.pdf" },
+    { name: "Zákon o letectví a vzdušném prostoru", url: "https://www.enjoyrp.cz/zakonnik/10-2001-Zákon%20o%20letectví%20a%20vzdušném%20prostoru.pdf" },
+    { name: "Zákon o podnikání", url: "https://www.enjoyrp.cz/zakonnik/11-2001-Zákon%20o%20podnikání%20v%20soukromém%20a%20veřejném%20právu.pdf" },
+    { name: "Zákon o advokacii", url: "https://www.enjoyrp.cz/zakonnik/12-2001-Zákon%20o%20advokacii.pdf" },
+    { name: "Silniční provoz na komunikacích", url: "https://www.enjoyrp.cz/zakonnik/13-2001-Zákon%20o%20bezpečnosti%20a%20provozu%20na%20pozemních%20komunikacích.pdf" },
+    { name: "Trestní zákoník a řád", url: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf" },
+    { name: "Zákon o LSPD", url: "https://www.enjoyrp.cz/zakonnik/15-2001-Zákon%20o%20Los%20Santos%20Police%20Department.pdf" },
+    { name: "Zákon o LSSD", url: "https://www.enjoyrp.cz/zakonnik/16-2001-Zákon%20o%20Los%20Santos%20Sheriff%27s%20Department.pdf" },
+    { name: "O omamných a psychotropních látkách", url: "https://www.enjoyrp.cz/zakonnik/17-2001-Zákon%20o%20omamných%20a%20psychotropních%20látkách.pdf" }
 ];
 
 function removeDiacritics(str) {
@@ -358,7 +380,7 @@ function renderLaws() {
     const resultsDiv = document.getElementById("lawResultsList");
     resultsDiv.innerHTML = "";
 
-    // Vykreslení ručního seznamu PDF
+    // Vykreslení ručního seznamu PDF všech 17 zákonů
     const manualDiv = document.getElementById("manualPdfList");
     manualDiv.innerHTML = "";
     manualPdfs.forEach(pdf => {
@@ -370,7 +392,7 @@ function renderLaws() {
         return;
     }
 
-    // Filtrování
+    // Filtrování smart engine
     const filteredLaws = lawDatabase.filter(law => {
         const matchTitle = removeDiacritics(law.title).includes(searchInput);
         const matchDesc = removeDiacritics(law.desc).includes(searchInput);
