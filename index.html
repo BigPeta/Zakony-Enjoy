@@ -79,7 +79,18 @@
     .header-right { display: flex; align-items: center; gap: 20px; font-size: 14px; font-weight: 500;}
     .btn-logout { background: transparent; border: 1px solid #dc2626; color: #ef4444; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;}
     .btn-logout:hover { background: #dc2626; color: white; }
+select option {
+    background-color: #0f1720 !important;
+    color: #ffffff !important;
+    padding: 10px;
+}
 
+/* Pokud chceš, aby i samotný select box vypadal lépe v tmavém režimu */
+select {
+    background-color: #0f1720 !important;
+    color: #ffffff !important;
+    border: 1px solid #1e293b !important;
+}
     /* --- ROZVRŽENÍ ZÁLOŽEK --- */
     .container { display:flex; flex: 1; overflow: hidden;}
     .sidebar { width: 420px; background: var(--bg-panel); padding: 25px; border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;}
