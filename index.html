@@ -3,80 +3,153 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SASP Terminal - Light Edition</title>
+<title>SASP Terminal - Premium Edition</title>
 <style>
-    /* --- ZÁKLADNÍ STYLY --- */
-    body { margin: 0; font-family: Arial, sans-serif; background: #0b1119; color: white; overflow: hidden; }
+    /* --- ZÁKLADNÍ STYLY & BARVY --- */
+    :root {
+        --bg-main: #06090f;
+        --bg-panel: #0d131f;
+        --bg-card: #151e2f;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #1e293b;
+    }
+
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-main); color: var(--text-main); overflow: hidden; }
     
-    /* --- LOGIN OBRAZOVKA --- */
-    #loginScreen { display: flex; width: 100vw; height: 100vh; align-items: center; justify-content: center; background: #0b1119; }
-    .login-box { display: flex; background: #111827; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .login-left { width: 40%; background: #0d131c; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-right: 1px solid #1e293b; }
-    .logo-circle { width: 80px; height: 80px; border: 2px solid #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-    .login-left h2 { margin: 0; font-size: 22px; color: #f8fafc; }
-    .login-left p { color: #64748b; font-size: 13px; margin: 10px 0 20px; line-height: 1.5; }
-    .badge { border: 1px solid #1e3a8a; color: #60a5fa; padding: 4px 12px; font-size: 10px; font-weight: bold; letter-spacing: 2px; border-radius: 4px; background: rgba(30, 58, 138, 0.2); }
+    /* --- VLASTNÍ SCROLLBAR --- */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-main); }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* --- LOGIN OBRAZOVKA (GLASSMORPHISM) --- */
+    #loginScreen { 
+        display: flex; width: 100vw; height: 100vh; align-items: center; justify-content: center; 
+        background: radial-gradient(circle at top left, #0f172a, #06090f);
+    }
+    .login-box { 
+        display: flex; background: rgba(13, 19, 31, 0.7); backdrop-filter: blur(10px); 
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; width: 750px; 
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); 
+    }
+    .login-left { 
+        width: 45%; background: rgba(0, 0, 0, 0.4); padding: 50px 30px; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; text-align: center; border-right: 1px solid var(--border-color); 
+    }
+    .logo-circle { 
+        width: 90px; height: 90px; border: 2px solid var(--accent); border-radius: 50%; display: flex; 
+        align-items: center; justify-content: center; font-size: 38px; margin-bottom: 25px; 
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); 
+    }
+    .login-left h2 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px; }
+    .login-left p { color: var(--text-muted); font-size: 13px; margin: 15px 0 25px; line-height: 1.6; }
+    .badge { border: 1px solid #1e3a8a; color: #60a5fa; padding: 5px 15px; font-size: 10px; font-weight: 700; letter-spacing: 2px; border-radius: 20px; background: rgba(30, 58, 138, 0.3); }
     
-    .login-right { width: 60%; padding: 40px; display: flex; flex-direction: column; justify-content: center;}
-    .input-group { margin-bottom: 15px; }
-    .input-group label { display: block; font-size: 12px; color: #64748b; margin-bottom: 6px; }
-    .name-row { display: flex; gap: 10px; }
-    .login-right input, .login-right select { width: 100%; padding: 12px; background: #0f1720; border: 1px solid #1e293b; color: white; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
-    .btn-login { background: #3b82f6; width: 100%; padding: 12px; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px;}
-    .btn-login:hover { background: #2563eb; }
+    .login-right { width: 55%; padding: 50px 40px; display: flex; flex-direction: column; justify-content: center;}
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;}
+    .name-row { display: flex; gap: 12px; }
+    .login-right input, .login-right select { 
+        width: 100%; padding: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); 
+        color: white; border-radius: 8px; font-size: 14px; transition: all 0.3s; 
+    }
+    .login-right input:focus, .login-right select:focus { outline: none; border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
+    .btn-login { 
+        background: var(--accent); width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; 
+        font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; transition: all 0.3s;
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn-login:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); }
 
     /* --- HLAVIČKA APLIKACE --- */
     #mainApp { display: none; flex-direction: column; height: 100vh; }
-    header { background:#111827; padding:10px 20px; font-weight:bold; border-bottom:2px solid #1e293b; display: flex; justify-content: space-between; align-items: center;}
-    .header-left { display: flex; align-items: center; gap: 20px; }
-    .app-title { font-size: 20px; margin-right: 15px; color: #60a5fa;}
-    .nav-tabs { display: flex; gap: 10px; }
-    .nav-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
-    .nav-btn:hover { background: #334155; color: white; }
-    .nav-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
-    .header-right { display: flex; align-items: center; gap: 15px; font-size: 14px; color: #94a3b8; }
-    .btn-logout { background: transparent; border: 1px solid #dc2626; color: #ef4444; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;}
+    header { background: var(--bg-panel); padding: 15px 25px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 10;}
+    .header-left { display: flex; align-items: center; gap: 30px; }
+    .app-title { font-size: 22px; font-weight: 700; color: var(--text-main); letter-spacing: 1px;}
+    .app-title span { color: var(--accent); }
+    
+    .nav-tabs { display: flex; gap: 8px; }
+    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid transparent; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+    .nav-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-btn.active { background: rgba(59, 130, 246, 0.1); color: var(--accent); border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);}
+    
+    .header-right { display: flex; align-items: center; gap: 20px; font-size: 14px; font-weight: 500;}
+    .btn-logout { background: transparent; border: 1px solid #dc2626; color: #ef4444; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;}
+    .btn-logout:hover { background: #dc2626; color: white; }
 
     /* --- ROZVRŽENÍ ZÁLOŽEK --- */
     .container { display:flex; flex: 1; overflow: hidden;}
-    .sidebar { width: 400px; background: #111827; padding: 20px; border-right: 2px solid #1e293b; overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;}
-    .main { flex: 1; padding: 20px; overflow-y: auto; position: relative; background: #0b1119;}
+    .sidebar { width: 420px; background: var(--bg-panel); padding: 25px; border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;}
+    .main { flex: 1; position: relative; background: var(--bg-main);}
+
+    /* --- ZÁKONY A PDF --- */
+    #pdfSection { display: none; flex: 1; overflow: hidden; }
+    .section-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 15px 0; font-weight: 700;}
+    
+    .law-list { display: flex; flex-direction: column; gap: 8px; }
+    .pdf-btn { 
+        background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); 
+        padding: 14px 16px; width: 100%; text-align: left; border-radius: 8px; cursor: pointer; 
+        font-size: 13px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+    }
+    .pdf-btn i { font-size: 16px; color: var(--text-muted); }
+    .pdf-btn:hover { background: #1e293b; border-color: var(--accent); transform: translateX(3px); }
+    .pdf-btn.active-law { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);}
+    .pdf-btn.active-law i { color: white; }
+
+    /* --- PŘEDTISKY A HLÁŠENÍ --- */
+    #templatesSection { display: none; flex: 1; overflow: hidden; }
+    .form-container { padding: 40px; height: 100%; overflow-y: auto; box-sizing: border-box; display: flex; justify-content: center;}
+    
+    .template-builder { 
+        background: var(--bg-card); padding: 40px; border: 1px solid var(--border-color); 
+        font-size: 14px; line-height: 1.8; color: var(--text-main); border-radius: 12px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 800px; height: fit-content;
+    }
+    
+    .doc-header { border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;}
+    .doc-header h2 { margin: 0; color: var(--accent); font-size: 22px; font-weight: 600;}
+    .doc-header span { color: var(--text-muted); font-size: 12px; }
+
+    .inline-form-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px;}
+    .inline-input { 
+        background: transparent; border: none; border-bottom: 1px dashed var(--text-muted); 
+        color: var(--accent); padding: 4px 8px; font-family: 'Segoe UI', sans-serif; font-size: 14px; 
+        transition: all 0.2s; font-weight: 600; text-align: center;
+    }
+    .inline-input:focus { outline: none; border-bottom: 2px solid var(--accent); background: rgba(59, 130, 246, 0.1); border-radius: 4px;}
+    .inline-input::placeholder { color: #475569; font-weight: 400; font-style: italic; }
+    
+    .textarea-label { color: var(--text-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; margin-top: 20px; display: block; margin-bottom: 8px;}
+    .inline-textarea { 
+        width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); 
+        color: var(--text-main); padding: 15px; box-sizing: border-box; resize: vertical; 
+        font-family: inherit; font-size: 14px; min-height: 100px; border-radius: 8px; transition: 0.2s;
+    }
+    .inline-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+    
+    .doc-footer { margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; justify-content: space-between; align-items: flex-end;}
+    .signature { color: var(--text-muted); line-height: 1.5; }
+    .signature b { color: white; font-size: 16px; display: block; margin-top: 5px;}
+    
+    .btn-copy { 
+        background: #10b981; color: white; border: none; padding: 12px 25px; border-radius: 8px; 
+        cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;
+        display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .btn-copy:hover { background: #059669; transform: translateY(-2px); }
 
     /* --- MAPA --- */
     #mapSection { display: none; flex: 1; position: relative; background: #000; overflow: hidden; }
     #mapContainer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: grab; }
     #mapContainer:active { cursor: grabbing; }
     #mapImage { max-width: none; width: 100%; transition: transform 0.1s ease-out; transform-origin: top left; pointer-events: none;}
-    .map-controls { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 10px; background: rgba(17, 24, 39, 0.8); padding: 10px; border-radius: 8px; z-index: 10;}
-    .map-btn { background: #3b82f6; color: white; border: none; width: 40px; height: 40px; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; }
-
-    /* --- HLÁŠENÍ A PŘEDTISKY --- */
-    #templatesSection { display: none; flex: 1; overflow: hidden; }
-    .template-builder { background: #0f1720; padding: 25px; border: 1px solid #1e293b; font-size: 13px; line-height: 2.0; color: #94a3b8; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
-    .inline-form-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
-    .inline-input { background: transparent; border: none; border-bottom: 1px solid #334155; color: #60a5fa; padding: 2px 5px; font-family: monospace; font-size: 13px; transition: border-color 0.2s;}
-    .inline-input:focus { outline: none; border-bottom-color: #3b82f6; }
-    .textarea-label { color: #cbd5e1; font-size: 13px; font-weight: bold; margin-top: 15px; display: block; margin-bottom: 5px;}
-    .inline-textarea { width: 100%; background: #0b1119; border: 1px solid #1e293b; color: #60a5fa; padding: 10px; box-sizing: border-box; resize: vertical; font-family: monospace; min-height: 80px;}
-    .btn-copy { background: #10b981; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 25px; font-size: 14px;}
-    
-    /* --- ZÁKONY A SEARCH ENGINE --- */
-    #pdfSection { display: none; flex: 1; overflow: hidden; }
-    .search-bar { font-size: 16px; border: 2px solid #3b82f6; background: #0f1720; width: 100%; padding: 12px; color:white; border-radius: 6px; box-sizing: border-box; margin-bottom: 15px;}
-    
-    /* Nový design pro výsledky hledání */
-    .smart-result { background: #1e293b; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #3b82f6; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;}
-    .smart-result:hover { background: #334155; border-color: #3b82f6; transform: translateX(2px); }
-    .smart-source { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;}
-    .smart-title { font-size: 15px; color: #f8fafc; font-weight: bold;}
-    .smart-desc { font-size: 12px; color: #cbd5e1; margin-top: 6px; line-height: 1.4;}
-
-    .pdf-btn { background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 8px; width: 100%; text-align: left; border-radius: 4px; cursor: pointer; margin-bottom: 4px; font-size: 12px; transition: 0.2s;}
-    .pdf-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
-    
-    .laws-scroll-container { display: flex; flex-direction: column; overflow-y: auto; max-height: 50vh; padding-right: 5px; }
-    .laws-scroll-container::-webkit-scrollbar { width: 6px; }
-    .laws-scroll-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    .map-controls { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 10px; background: rgba(13, 19, 31, 0.8); backdrop-filter: blur(5px); padding: 10px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 25px rgba(0,0,0,0.5);}
+    .map-btn { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); width: 45px; height: 45px; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+    .map-btn:hover { background: var(--accent); color: white; border-color: var(--accent);}
 </style>
 </head>
 <body>
@@ -84,13 +157,12 @@
 <div id="loginScreen">
     <div class="login-box">
         <div class="login-left">
-            <div class="logo-circle">⚖️</div>
+            <div class="logo-circle">🛡️</div>
             <h2>SASP Terminal</h2>
-            <p>Odlehčená verze<br>Smart Law Engine</p>
-            <div class="badge">SECURE OFFLINE</div>
+            <p>Premium Offline Edition<br>Rychlý, bezpečný a elegantní přístup k dokumentům.</p>
+            <div class="badge">SECURE SYSTEM</div>
         </div>
         <div class="login-right">
-            <h3>Identifikace detektiva</h3>
             <div class="input-group">
                 <label>Hodnost</label>
                 <select id="loginRank">
@@ -103,13 +175,13 @@
                 </select>
             </div>
             <div class="input-group">
-                <label>Jméno a příjmení</label>
+                <label>Identifikace (Jméno a Příjmení)</label>
                 <div class="name-row">
-                    <input type="text" id="loginFName" placeholder="Jméno (např. Jan)">
-                    <input type="text" id="loginLName" placeholder="Příjmení (např. Novák)">
+                    <input type="text" id="loginFName" placeholder="Jan">
+                    <input type="text" id="loginLName" placeholder="Novák">
                 </div>
             </div>
-            <button class="btn-login" onclick="performLogin()">Vstoupit do systému</button>
+            <button class="btn-login" onclick="performLogin()">Vstoupit do terminálu</button>
         </div>
     </div>
 </div>
@@ -117,71 +189,88 @@
 <div id="mainApp">
     <header>
         <div class="header-left">
-            <span class="app-title">SASP Terminal</span>
+            <div class="app-title">SASP <span>Terminal</span></div>
             <div class="nav-tabs">
-                <button class="nav-btn active" id="tab-pdfSection" onclick="switchTab('pdfSection')">⚖️ Zákony a Paragrafy</button>
-                <button class="nav-btn" id="tab-templatesSection" onclick="switchTab('templatesSection')">📝 Hlášení a Předtisky</button>
-                <button class="nav-btn" id="tab-mapSection" onclick="switchTab('mapSection')">🗺️ Mapa</button>
+                <button class="nav-btn active" id="tab-pdfSection" onclick="switchTab('pdfSection')">⚖️ Sbírka zákonů</button>
+                <button class="nav-btn" id="tab-templatesSection" onclick="switchTab('templatesSection')">📝 Úřední předtisky</button>
+                <button class="nav-btn" id="tab-mapSection" onclick="switchTab('mapSection')">🗺️ Interaktivní mapa</button>
             </div>
         </div>
         <div class="header-right">
-            <span id="loggedInUser">Neznámý Uživatel</span>
-            <button class="btn-logout" onclick="logout()">Odhlásit</button>
+            <span id="loggedInUser"></span>
+            <button class="btn-logout" onclick="logout()">Odhlásit se</button>
         </div>
     </header>
 
     <div id="pdfSection" class="container" style="display: flex;">
         <div class="sidebar">
-            <input type="text" id="lawSearch" class="search-bar" placeholder="Hledat (např. 'domovní prohlídka', 'vydírání')..." oninput="renderLaws()">
-            <div id="lawResultsList"></div>
-            
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase;">Kompletní sbírka zákonů</h4>
-            
-            <div id="manualPdfList" class="laws-scroll-container">
+            <h4 class="section-title">Dokumenty státu San Andreas</h4>
+            <div id="manualPdfList" class="law-list">
                 </div>
         </div>
         <div class="main" style="padding: 0;">
-            <iframe id="pdfFrame" src="about:blank" width="100%" height="100%" style="border:none; border-radius: 8px; background: #1e293b;"></iframe>
+            <iframe id="pdfFrame" src="about:blank" width="100%" height="100%" style="border:none;"></iframe>
         </div>
     </div>
 
     <div id="templatesSection" class="container">
-        <div class="sidebar" style="width: 340px;">
-            <h3 style="margin-bottom: 15px;">Dostupné předtisky</h3>
-            <select id="templateSelector" style="width: 100%; padding: 10px; background: #0f1720; color:white; border:1px solid #3b82f6; border-radius:6px; font-weight: bold;">
+        <div class="sidebar" style="width: 320px;">
+            <h4 class="section-title">Výběr formuláře</h4>
+            <select id="templateSelector" style="width: 100%; padding: 12px; background: var(--bg-card); color:white; border:1px solid var(--border-color); border-radius:8px; font-weight: bold; cursor: pointer; outline: none;">
                 <option value="nesouhlas">Nesouhlas s trestem</option>
-            </select>
-            <p style="color:#64748b; font-size: 12px; margin-top: 20px;">
-                Vaše jméno a dnešní datum se automaticky doplnilo. Vyplňte zbytek a zkopírujte hlášení.
+                </select>
+            <p style="color:var(--text-muted); font-size: 12px; margin-top: 25px; line-height: 1.5; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border-color);">
+                💡 <b>Tip:</b> Vaše jméno, hodnost a dnešní datum se automaticky doplnily z vašeho přihlášení. Vyplňte chybějící údaje a zkopírujte hotové hlášení.
             </p>
         </div>
-        <div class="main">
+        <div class="main form-container">
             <div id="activeTemplateArea" class="template-builder">
-                <p style="margin-top:0; color:#f8fafc;">Vážený @Soudce / @Statni zastupce tímto žádám o vyjádření k rozhodnutí ve věci zkráceného řízení:</p>
+                
+                <div class="doc-header">
+                    <h2>Nesouhlas se zkráceným řízením</h2>
+                    <span>FORM-SA-01</span>
+                </div>
+
+                <p style="margin-top:0;">Vážený @Soudce / @Statni zastupce, tímto žádám o vyjádření k rozhodnutí ve věci zkráceného řízení:</p>
+                
                 <div class="inline-form-row">
-                    <span>Osoba</span> <input type="text" id="tpl_osoba" class="inline-input" placeholder="Jméno Příjmení">
-                    <span>DOB:</span> <input type="text" id="tpl_dob" class="inline-input" placeholder="DD.MM.YYYY" style="width: 100px;">
-                    <span>nesouhlasí s rozhodnutím pro</span> <input type="text" id="tpl_cin1" class="inline-input" placeholder="Trestný čin">
+                    Osoba <input type="text" id="tpl_osoba" class="inline-input" placeholder="Jméno a Příjmení" style="width: 180px;">
+                    DOB: <input type="text" id="tpl_dob" class="inline-input" placeholder="DD.MM.YYYY" style="width: 100px;">
+                    nesouhlasí s rozhodnutím pro čin
                 </div>
                 <div class="inline-form-row">
-                    <span>Výše uvedený(á) dne</span> <input type="text" id="tpl_datum" class="inline-input" placeholder="Datum" style="width: 100px;">
-                    <span>kolem</span> <input type="text" id="tpl_cas" class="inline-input" placeholder="Čas" style="width: 80px;">
-                    <input type="text" id="tpl_popis" class="inline-input" placeholder="Popis jednání osoby" style="flex:1;">
+                    <input type="text" id="tpl_cin1" class="inline-input" placeholder="Doplňte trestný čin..." style="flex:1;">.
                 </div>
                 
-                <span class="textarea-label">Důvod nesouhlasu s trestem:</span>
-                <textarea id="tpl_duvod" class="inline-textarea" placeholder="Detailní popis..."></textarea>
-                
-                <span class="textarea-label">Důkazní prostředky:</span>
-                <textarea id="tpl_dukazy" class="inline-textarea" placeholder="Seznam důkazů..."></textarea>
-                
-                <div class="inline-form-row" style="margin-top: 15px;">
-                    <span>Výpis z rejstříku: byl již</span> <input type="number" id="tpl_pocet" class="inline-input" placeholder="Počet" style="width: 60px;">
-                    <span>x trestán pro</span> <input type="text" id="tpl_cin2" class="inline-input" placeholder="Trestný čin" style="flex:1;">
+                <div class="inline-form-row" style="margin-top: 20px;">
+                    Výše uvedený(á) dne <input type="text" id="tpl_datum" class="inline-input" placeholder="Datum" style="width: 100px;">
+                    kolem času <input type="text" id="tpl_cas" class="inline-input" placeholder="HH:MM" style="width: 80px;">
                 </div>
-                <p style="margin-top: 30px;">Děkuji,<br>S pozdravem<br><b id="tpl_zpracoval" style="color:#60a5fa;"></b></p>
-                <button class="btn-copy" onclick="generateAndCopyNesouhlas()">Zkopírovat hlášení do schránky</button>
+                <div class="inline-form-row">
+                    <input type="text" id="tpl_popis" class="inline-input" placeholder="Stručně popište jednání osoby..." style="flex:1;">.
+                </div>
+                
+                <span class="textarea-label">Odůvodnění nesouhlasu:</span>
+                <textarea id="tpl_duvod" class="inline-textarea" placeholder="Detailně popište, proč osoba nesouhlasí s trestem..."></textarea>
+                
+                <span class="textarea-label">Přiložené důkazy:</span>
+                <textarea id="tpl_dukazy" class="inline-textarea" placeholder="Seznam důkazních čísel a odkazů..." style="min-height: 60px;"></textarea>
+                
+                <div class="inline-form-row" style="margin-top: 20px;">
+                    Z rejstříku vyplývá, že osoba byla již <input type="number" id="tpl_pocet" class="inline-input" placeholder="X" style="width: 60px;">
+                    krát trestána pro <input type="text" id="tpl_cin2" class="inline-input" placeholder="Doplňte trestný čin..." style="flex:1;">.
+                </div>
+                
+                <div class="doc-footer">
+                    <div class="signature">
+                        Zpracoval a předložil:<br>
+                        <b id="tpl_zpracoval">Neznámý Detektiv</b>
+                    </div>
+                    <button class="btn-copy" onclick="generateAndCopyNesouhlas()">
+                        📋 Zkopírovat hlášení
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -193,7 +282,7 @@
         <div class="map-controls">
             <button class="map-btn" onclick="zoomMapBtn(0.2)">+</button>
             <button class="map-btn" onclick="zoomMapBtn(-0.2)">-</button>
-            <button class="map-btn" style="font-size: 14px; width:auto; padding:0 10px;" onclick="resetMap()">Reset</button>
+            <button class="map-btn" style="font-size: 13px; width:auto; padding:0 15px;" onclick="resetMap()">Reset</button>
         </div>
     </div>
 
@@ -215,6 +304,7 @@ function checkAuth() {
         const fullName = `${currentUser.rank} ${currentUser.fName} ${currentUser.lName}`;
         document.getElementById("loggedInUser").innerText = "👤 " + fullName;
         
+        // Auto-vyplnění předtisků
         if (document.getElementById("tpl_zpracoval")) {
             document.getElementById("tpl_zpracoval").innerText = fullName;
             document.getElementById("tpl_datum").value = new Date().toLocaleDateString("cs-CZ");
@@ -233,7 +323,7 @@ function performLogin() {
     const lName = document.getElementById("loginLName").value.trim();
 
     if (!fName || !lName) {
-        alert("Zadejte jméno a příjmení.");
+        alert("Prosím, zadejte jméno a příjmení.");
         return;
     }
 
@@ -268,20 +358,12 @@ function switchTab(tabId) {
     }
 }
 
-function loadPdf(url, pageNum = null) {
-    // Pokud je předána stránka, přidá se na konec URL jako parametr
-    const finalUrl = pageNum ? `${url}#page=${pageNum}` : url;
-    document.getElementById('pdfFrame').src = finalUrl;
-}
-
 // Blbuvzdorné ovládání mapy pro všechny typy prohlížečů
 let scale = 1, panning = false, pointX = 0, pointY = 0, startX = 0, startY = 0;
 const mapContainer = document.getElementById("mapContainer");
 const mapImage = document.getElementById("mapImage");
 
-function setTransform() { 
-    mapImage.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; 
-}
+function setTransform() { mapImage.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; }
 
 mapContainer.onmousedown = (e) => { e.preventDefault(); panning = true; startX = e.clientX - pointX; startY = e.clientY - pointY; };
 mapContainer.onmouseup = () => panning = false; 
@@ -307,7 +389,7 @@ function zoomMapBtn(a) { scale += a; if(scale < 0.2) scale = 0.2; if(scale > 10)
 function resetMap() { scale = 1; pointX = 0; pointY = 0; setTransform(); }
 
 /* =========================================
-   3. GENERÁTOR HLÁŠENÍ
+   3. GENERÁTOR HLÁŠENÍ (KOPÍROVÁNÍ)
 ========================================= */
 function generateAndCopyNesouhlas() {
     const finalReport = `Vážený @Soudce / @Statni zastupce tímto žádám o vyjádření k rozhodnutí ve věci zkráceného řízení:
@@ -331,58 +413,13 @@ S pozdravem
 ${currentUser.rank} ${currentUser.fName} ${currentUser.lName}`;
 
     navigator.clipboard.writeText(finalReport).then(() => {
-        alert("Hlášení bylo úspěšně zkopírováno. Můžete vložit (Ctrl+V).");
+        alert("Hlášení bylo úspěšně zkopírováno do schránky! Můžete vložit (Ctrl+V).");
     }).catch(err => alert("Chyba při kopírování: " + err));
 }
 
 /* =========================================
-   4. CHYTRÝ VYHLEDÁVAČ ZÁKONŮ (VČETNĚ STRAN)
+   4. SEZNAM ZÁKONŮ
 ========================================= */
-
-// Upravená databáze: icon, lawSource, page (strana pro skok v PDF)
-const lawDatabase = [
-    {
-        title: "Domovní prohlídka",
-        paragraph: "§ 83",
-        lawSource: "Trestní řád",
-        icon: "🚨",
-        pdfUrl: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf",
-        page: 15, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
-        synonyms: ["razie", "prohlídka bytu", "vstup do domu", "beranidlo"],
-        desc: "Nařízení a výkon domovní prohlídky a osobní prohlídky."
-    },
-    {
-        title: "Vstup do obydlí",
-        paragraph: "§ 40",
-        lawSource: "Zákon o policii",
-        icon: "📘",
-        pdfUrl: "https://www.enjoyrp.cz/zakonnik/15-2001-Zákon%20o%20Los%20Santos%20Police%20Department.pdf",
-        page: 8, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
-        synonyms: ["vniknutí", "prohlídka", "vstup do bytu", "záchrana života"],
-        desc: "Oprávnění policisty vstoupit do obydlí bez souhlasu z důvodu ohrožení života nebo stíhání."
-    },
-    {
-        title: "Vydírání",
-        paragraph: "§ 175",
-        lawSource: "Trestní zákoník",
-        icon: "🚨",
-        pdfUrl: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf",
-        page: 40, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
-        synonyms: ["nátlak", "vyhrožování", "výhružky", "výkupné", "donucení"],
-        desc: "Kdo jiného násilím, pohrůžkou násilí nebo jiné těžké újmy nutí, aby něco konal, opominul nebo trpěl."
-    },
-    {
-        title: "Ublížení na zdraví",
-        paragraph: "§ 146",
-        lawSource: "Trestní zákoník",
-        icon: "🚨",
-        pdfUrl: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf",
-        page: 35, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
-        synonyms: ["bouračka", "zranění", "nehoda", "přejetí", "napadnutí", "rvačka", "pěstmi"],
-        desc: "Kdo jinému úmyslně ublíží na zdraví."
-    }
-];
-
 const manualPdfs = [
     { name: "Ústava San Andreaské republiky", url: "https://www.enjoyrp.cz/zakonnik/1-2001-Ústava%20San%20Andreaské%20republiky.pdf" },
     { name: "Listina základních práv a svobod", url: "https://www.enjoyrp.cz/zakonnik/2-2001-Listina%20základních%20práv%20a%20svobod.pdf" },
@@ -403,53 +440,33 @@ const manualPdfs = [
     { name: "O omamných a psychotropních látkách", url: "https://www.enjoyrp.cz/zakonnik/17-2001-Zákon%20o%20omamných%20a%20psychotropních%20látkách.pdf" }
 ];
 
-function removeDiacritics(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+function loadPdfAndHighlight(url, btnElement) {
+    // Odstranit aktivní třídu ze všech tlačítek
+    document.querySelectorAll('.pdf-btn').forEach(btn => btn.classList.remove('active-law'));
+    // Přidat aktivní třídu kliknutému tlačítku
+    if(btnElement) btnElement.classList.add('active-law');
+    
+    // Načíst PDF do iframe
+    document.getElementById('pdfFrame').src = url;
 }
 
 function renderLaws() {
-    const searchInput = removeDiacritics(document.getElementById("lawSearch").value);
-    const resultsDiv = document.getElementById("lawResultsList");
-    resultsDiv.innerHTML = "";
-
     const manualDiv = document.getElementById("manualPdfList");
     manualDiv.innerHTML = "";
-    manualPdfs.forEach(pdf => {
-        manualDiv.innerHTML += `<button class="pdf-btn" onclick="loadPdf('${pdf.url}')">📄 ${pdf.name}</button>`;
+    
+    manualPdfs.forEach((pdf, index) => {
+        // První zákon se automaticky načte a zvýrazní
+        const isActive = index === 0 ? "active-law" : "";
+        manualDiv.innerHTML += `
+            <button class="pdf-btn ${isActive}" onclick="loadPdfAndHighlight('${pdf.url}', this)">
+                <i>📄</i> ${pdf.name}
+            </button>`;
     });
 
-    if (searchInput.length === 0) {
-        resultsDiv.innerHTML = `<p style="color:#64748b; font-size:12px; font-style:italic;">Napište hledaný pojem. Můžete použít i běžné výrazy jako 'domovní prohlídka', 'razie' atd.</p>`;
-        return;
+    // Automaticky načíst první PDF po startu
+    if (manualPdfs.length > 0) {
+        document.getElementById('pdfFrame').src = manualPdfs[0].url;
     }
-
-    const filteredLaws = lawDatabase.filter(law => {
-        const matchTitle = removeDiacritics(law.title).includes(searchInput);
-        const matchDesc = removeDiacritics(law.desc).includes(searchInput);
-        const matchSynonyms = law.synonyms.some(syn => removeDiacritics(syn).includes(searchInput));
-        return matchTitle || matchDesc || matchSynonyms;
-    });
-
-    if (filteredLaws.length === 0) {
-        resultsDiv.innerHTML = `<p style="color:#fca5a5; font-size:13px;">Tento pojem nebyl v rejstříku nalezen.</p>`;
-        return;
-    }
-
-    // Nový design podle tvého návrhu
-    filteredLaws.forEach(law => {
-        const card = document.createElement("div");
-        card.className = "smart-result";
-        
-        // Předáváme URL a konkrétní číslo stránky do funkce loadPdf
-        card.onclick = () => loadPdf(law.pdfUrl, law.page);
-
-        card.innerHTML = `
-            <div class="smart-source">${law.icon} ${law.lawSource}</div>
-            <div class="smart-title">${law.paragraph} ${law.title}</div>
-            ${law.desc ? `<div class="smart-desc">${law.desc}</div>` : ''}
-        `;
-        resultsDiv.appendChild(card);
-    });
 }
 </script>
 </body>
