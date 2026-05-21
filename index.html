@@ -2,721 +2,455 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Police MDT</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.276/pdf.min.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SASP Terminal - Light Edition</title>
 <style>
+    /* --- ZÁKLADNÍ STYLY --- */
+    body { margin: 0; font-family: Arial, sans-serif; background: #0b1119; color: white; overflow: hidden; }
+    
+    /* --- LOGIN OBRAZOVKA --- */
+    #loginScreen { display: flex; width: 100vw; height: 100vh; align-items: center; justify-content: center; background: #0b1119; }
+    .login-box { display: flex; background: #111827; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .login-left { width: 40%; background: #0d131c; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-right: 1px solid #1e293b; }
+    .logo-circle { width: 80px; height: 80px; border: 2px solid #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+    .login-left h2 { margin: 0; font-size: 22px; color: #f8fafc; }
+    .login-left p { color: #64748b; font-size: 13px; margin: 10px 0 20px; line-height: 1.5; }
+    .badge { border: 1px solid #1e3a8a; color: #60a5fa; padding: 4px 12px; font-size: 10px; font-weight: bold; letter-spacing: 2px; border-radius: 4px; background: rgba(30, 58, 138, 0.2); }
+    
+    .login-right { width: 60%; padding: 40px; display: flex; flex-direction: column; justify-content: center;}
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 12px; color: #64748b; margin-bottom: 6px; }
+    .name-row { display: flex; gap: 10px; }
+    .login-right input, .login-right select { width: 100%; padding: 12px; background: #0f1720; border: 1px solid #1e293b; color: white; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    .btn-login { background: #3b82f6; width: 100%; padding: 12px; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px;}
+    .btn-login:hover { background: #2563eb; }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
+    /* --- HLAVIČKA APLIKACE --- */
+    #mainApp { display: none; flex-direction: column; height: 100vh; }
+    header { background:#111827; padding:10px 20px; font-weight:bold; border-bottom:2px solid #1e293b; display: flex; justify-content: space-between; align-items: center;}
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .app-title { font-size: 20px; margin-right: 15px; color: #60a5fa;}
+    .nav-tabs { display: flex; gap: 10px; }
+    .nav-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
+    .nav-btn:hover { background: #334155; color: white; }
+    .nav-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .header-right { display: flex; align-items: center; gap: 15px; font-size: 14px; color: #94a3b8; }
+    .btn-logout { background: transparent; border: 1px solid #dc2626; color: #ef4444; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;}
 
-body{
-    background:#0b1119;
-    color:white;
-    overflow:hidden;
-}
+    /* --- ROZVRŽENÍ ZÁLOŽEK --- */
+    .container { display:flex; flex: 1; overflow: hidden;}
+    .sidebar { width: 400px; background: #111827; padding: 20px; border-right: 2px solid #1e293b; overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;}
+    .main { flex: 1; padding: 20px; overflow-y: auto; position: relative; background: #0b1119;}
 
-/* LOGIN */
+    /* --- MAPA --- */
+    #mapSection { display: none; flex: 1; position: relative; background: #000; overflow: hidden; }
+    #mapContainer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: grab; }
+    #mapContainer:active { cursor: grabbing; }
+    #mapImage { max-width: none; width: 100%; transition: transform 0.1s ease-out; transform-origin: top left; pointer-events: none;}
+    .map-controls { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 10px; background: rgba(17, 24, 39, 0.8); padding: 10px; border-radius: 8px; z-index: 10;}
+    .map-btn { background: #3b82f6; color: white; border: none; width: 40px; height: 40px; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; }
 
-#loginScreen{
-    position:fixed;
-    inset:0;
-    background:#0b1119;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-}
+    /* --- HLÁŠENÍ A PŘEDTISKY --- */
+    #templatesSection { display: none; flex: 1; overflow: hidden; }
+    .template-builder { background: #0f1720; padding: 25px; border: 1px solid #1e293b; font-size: 13px; line-height: 2.0; color: #94a3b8; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
+    .inline-form-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+    .inline-input { background: transparent; border: none; border-bottom: 1px solid #334155; color: #60a5fa; padding: 2px 5px; font-family: monospace; font-size: 13px; transition: border-color 0.2s;}
+    .inline-input:focus { outline: none; border-bottom-color: #3b82f6; }
+    .textarea-label { color: #cbd5e1; font-size: 13px; font-weight: bold; margin-top: 15px; display: block; margin-bottom: 5px;}
+    .inline-textarea { width: 100%; background: #0b1119; border: 1px solid #1e293b; color: #60a5fa; padding: 10px; box-sizing: border-box; resize: vertical; font-family: monospace; min-height: 80px;}
+    .btn-copy { background: #10b981; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 25px; font-size: 14px;}
+    
+    /* --- ZÁKONY A SEARCH ENGINE --- */
+    #pdfSection { display: none; flex: 1; overflow: hidden; }
+    .search-bar { font-size: 16px; border: 2px solid #3b82f6; background: #0f1720; width: 100%; padding: 12px; color:white; border-radius: 6px; box-sizing: border-box; margin-bottom: 15px;}
+    
+    /* Nový design pro výsledky hledání */
+    .smart-result { background: #1e293b; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #3b82f6; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;}
+    .smart-result:hover { background: #334155; border-color: #3b82f6; transform: translateX(2px); }
+    .smart-source { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;}
+    .smart-title { font-size: 15px; color: #f8fafc; font-weight: bold;}
+    .smart-desc { font-size: 12px; color: #cbd5e1; margin-top: 6px; line-height: 1.4;}
 
-.login-box{
-    width:400px;
-    background:#121b26;
-    border:1px solid #1f2d3d;
-    padding:30px;
-    border-radius:12px;
-}
-
-.login-box h1{
-    margin-bottom:20px;
-}
-
-.login-box input,
-.login-box select{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    background:#091018;
-    border:1px solid #243445;
-    color:white;
-    border-radius:8px;
-}
-
-.login-box button{
-    width:100%;
-    margin-top:20px;
-    padding:12px;
-    border:none;
-    background:#1f6feb;
-    color:white;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-/* APP */
-
-#app{
-    display:none;
-    height:100vh;
-    flex-direction:column;
-}
-
-/* HEADER */
-
-header{
-    height:70px;
-    background:#121b26;
-    border-bottom:1px solid #1d2b3a;
-    display:flex;
-    align-items:center;
-    padding:0 20px;
-    justify-content:space-between;
-}
-
-.tabs{
-    display:flex;
-    gap:10px;
-}
-
-.tab-btn{
-    background:#16212e;
-    border:none;
-    color:white;
-    padding:10px 16px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.tab-btn.active{
-    background:#1f6feb;
-}
-
-.officer{
-    color:#7d8ea3;
-}
-
-/* CONTENT */
-
-.content{
-    flex:1;
-    overflow:hidden;
-    position:relative;
-}
-
-.page{
-    display:none;
-    height:100%;
-}
-
-.page.active{
-    display:flex;
-}
-
-/* LAWS */
-
-#lawsPage{
-    display:flex;
-}
-
-.sidebar{
-    width:320px;
-    background:#101821;
-    border-right:1px solid #1f2d3d;
-    padding:15px;
-    overflow:auto;
-}
-
-.sidebar h2{
-    margin-bottom:15px;
-}
-
-.search-box{
-    width:100%;
-    padding:12px;
-    background:#091018;
-    border:1px solid #243445;
-    color:white;
-    border-radius:8px;
-    margin-bottom:15px;
-}
-
-.result{
-    background:#17222f;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:10px;
-    cursor:pointer;
-}
-
-.result:hover{
-    background:#1d2b3a;
-}
-
-.result-law{
-    color:#4da3ff;
-    font-size:14px;
-}
-
-.result-page{
-    color:#8899aa;
-    font-size:12px;
-    margin-top:5px;
-}
-
-.viewer{
-    flex:1;
-    background:#0d141d;
-    position:relative;
-}
-
-.viewer iframe{
-    width:100%;
-    height:100%;
-    border:none;
-}
-
-/* MAP */
-
-#mapPage{
-    position:relative;
-    overflow:hidden;
-    background:#091018;
-}
-
-#mapImage{
-    position:absolute;
-    cursor:grab;
-    user-select:none;
-    transform-origin:center;
-}
-
-/* REPORTS */
-
-#reportsPage{
-    padding:30px;
-    overflow:auto;
-    flex-direction:column;
-    gap:15px;
-}
-
-.report-box{
-    max-width:700px;
-    background:#121b26;
-    padding:20px;
-    border-radius:12px;
-}
-
-.report-box input,
-.report-box textarea{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    background:#091018;
-    border:1px solid #243445;
-    color:white;
-    border-radius:8px;
-}
-
-.report-box button{
-    margin-top:15px;
-    padding:12px;
-    background:#1f6feb;
-    border:none;
-    color:white;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.generated{
-    margin-top:20px;
-    background:#091018;
-    padding:15px;
-    border-radius:8px;
-    white-space:pre-wrap;
-}
-
-/* SCROLL */
-
-::-webkit-scrollbar{
-    width:8px;
-}
-
-::-webkit-scrollbar-thumb{
-    background:#243445;
-    border-radius:10px;
-}
-
+    .pdf-btn { background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 8px; width: 100%; text-align: left; border-radius: 4px; cursor: pointer; margin-bottom: 4px; font-size: 12px; transition: 0.2s;}
+    .pdf-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+    
+    .laws-scroll-container { display: flex; flex-direction: column; overflow-y: auto; max-height: 50vh; padding-right: 5px; }
+    .laws-scroll-container::-webkit-scrollbar { width: 6px; }
+    .laws-scroll-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-
 <div id="loginScreen">
-
     <div class="login-box">
-
-        <h1>Police MDT</h1>
-
-        <input type="text" id="officerName" placeholder="Officer Name">
-
-        <select id="officerRank">
-            <option>CSI</option>
-            <option>Detective I</option>
-            <option>Detective II</option>
-            <option>Lieutenant</option>
-            <option>Staff</option>
-        </select>
-
-        <button onclick="login()">ENTER SYSTEM</button>
-
+        <div class="login-left">
+            <div class="logo-circle">⚖️</div>
+            <h2>SASP Terminal</h2>
+            <p>Odlehčená verze<br>Smart Law Engine</p>
+            <div class="badge">SECURE OFFLINE</div>
+        </div>
+        <div class="login-right">
+            <h3>Identifikace detektiva</h3>
+            <div class="input-group">
+                <label>Hodnost</label>
+                <select id="loginRank">
+                    <option value="Staff">Staff</option>
+                    <option value="Lieutenant">Lieutenant</option>
+                    <option value="Detective III">Detective III</option>
+                    <option value="Detective II">Detective II</option>
+                    <option value="Detective I" selected>Detective I</option>
+                    <option value="CSI">CSI</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Jméno a příjmení</label>
+                <div class="name-row">
+                    <input type="text" id="loginFName" placeholder="Jméno (např. Jan)">
+                    <input type="text" id="loginLName" placeholder="Příjmení (např. Novák)">
+                </div>
+            </div>
+            <button class="btn-login" onclick="performLogin()">Vstoupit do systému</button>
+        </div>
     </div>
-
 </div>
 
-<!-- APP -->
-
-<div id="app">
-
+<div id="mainApp">
     <header>
-
-        <div class="tabs">
-
-            <button class="tab-btn active" onclick="switchPage('lawsPage', this)">
-                Zákony
-            </button>
-
-            <button class="tab-btn" onclick="switchPage('mapPage', this)">
-                Mapa
-            </button>
-
-            <button class="tab-btn" onclick="switchPage('reportsPage', this)">
-                Předtisky
-            </button>
-
+        <div class="header-left">
+            <span class="app-title">SASP Terminal</span>
+            <div class="nav-tabs">
+                <button class="nav-btn active" id="tab-pdfSection" onclick="switchTab('pdfSection')">⚖️ Zákony a Paragrafy</button>
+                <button class="nav-btn" id="tab-templatesSection" onclick="switchTab('templatesSection')">📝 Hlášení a Předtisky</button>
+                <button class="nav-btn" id="tab-mapSection" onclick="switchTab('mapSection')">🗺️ Mapa</button>
+            </div>
         </div>
-
-        <div class="officer" id="officerDisplay"></div>
-
+        <div class="header-right">
+            <span id="loggedInUser">Neznámý Uživatel</span>
+            <button class="btn-logout" onclick="logout()">Odhlásit</button>
+        </div>
     </header>
 
-    <div class="content">
-
-        <!-- LAWS -->
-
-        <div class="page active" id="lawsPage">
-
-            <div class="sidebar">
-
-                <h2>Zákony</h2>
-
-                <input
-                    type="text"
-                    class="search-box"
-                    placeholder="Vyhledat..."
-                    id="lawSearch"
-                >
-
-                <div id="results"></div>
-
-            </div>
-
-            <div class="viewer">
-
-                <iframe
-                    id="pdfViewer"
-                    src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf">
-                </iframe>
-
-            </div>
-
+    <div id="pdfSection" class="container" style="display: flex;">
+        <div class="sidebar">
+            <input type="text" id="lawSearch" class="search-bar" placeholder="Hledat (např. 'domovní prohlídka', 'vydírání')..." oninput="renderLaws()">
+            <div id="lawResultsList"></div>
+            
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase;">Kompletní sbírka zákonů</h4>
+            
+            <div id="manualPdfList" class="laws-scroll-container">
+                </div>
         </div>
-
-        <!-- MAP -->
-
-        <div class="page" id="mapPage">
-
-            <img
-                id="mapImage"
-                src="https://i.imgur.com/k7xWOfA.png"
-            >
-
+        <div class="main" style="padding: 0;">
+            <iframe id="pdfFrame" src="about:blank" width="100%" height="100%" style="border:none; border-radius: 8px; background: #1e293b;"></iframe>
         </div>
+    </div>
 
-        <!-- REPORTS -->
-
-        <div class="page" id="reportsPage">
-
-            <div class="report-box">
-
-                <h2>Nesouhlas s trestem</h2>
-
-                <input type="text" id="suspectName" placeholder="Jméno osoby">
-
-                <textarea
-                    id="reason"
-                    rows="6"
-                    placeholder="Důvod nesouhlasu">
-                </textarea>
-
-                <button onclick="generateReport()">
-                    Vygenerovat
-                </button>
-
-                <div class="generated" id="generatedReport"></div>
-
-                <button onclick="copyReport()">
-                    Kopírovat
-                </button>
-
+    <div id="templatesSection" class="container">
+        <div class="sidebar" style="width: 340px;">
+            <h3 style="margin-bottom: 15px;">Dostupné předtisky</h3>
+            <select id="templateSelector" style="width: 100%; padding: 10px; background: #0f1720; color:white; border:1px solid #3b82f6; border-radius:6px; font-weight: bold;">
+                <option value="nesouhlas">Nesouhlas s trestem</option>
+            </select>
+            <p style="color:#64748b; font-size: 12px; margin-top: 20px;">
+                Vaše jméno a dnešní datum se automaticky doplnilo. Vyplňte zbytek a zkopírujte hlášení.
+            </p>
+        </div>
+        <div class="main">
+            <div id="activeTemplateArea" class="template-builder">
+                <p style="margin-top:0; color:#f8fafc;">Vážený @Soudce / @Statni zastupce tímto žádám o vyjádření k rozhodnutí ve věci zkráceného řízení:</p>
+                <div class="inline-form-row">
+                    <span>Osoba</span> <input type="text" id="tpl_osoba" class="inline-input" placeholder="Jméno Příjmení">
+                    <span>DOB:</span> <input type="text" id="tpl_dob" class="inline-input" placeholder="DD.MM.YYYY" style="width: 100px;">
+                    <span>nesouhlasí s rozhodnutím pro</span> <input type="text" id="tpl_cin1" class="inline-input" placeholder="Trestný čin">
+                </div>
+                <div class="inline-form-row">
+                    <span>Výše uvedený(á) dne</span> <input type="text" id="tpl_datum" class="inline-input" placeholder="Datum" style="width: 100px;">
+                    <span>kolem</span> <input type="text" id="tpl_cas" class="inline-input" placeholder="Čas" style="width: 80px;">
+                    <input type="text" id="tpl_popis" class="inline-input" placeholder="Popis jednání osoby" style="flex:1;">
+                </div>
+                
+                <span class="textarea-label">Důvod nesouhlasu s trestem:</span>
+                <textarea id="tpl_duvod" class="inline-textarea" placeholder="Detailní popis..."></textarea>
+                
+                <span class="textarea-label">Důkazní prostředky:</span>
+                <textarea id="tpl_dukazy" class="inline-textarea" placeholder="Seznam důkazů..."></textarea>
+                
+                <div class="inline-form-row" style="margin-top: 15px;">
+                    <span>Výpis z rejstříku: byl již</span> <input type="number" id="tpl_pocet" class="inline-input" placeholder="Počet" style="width: 60px;">
+                    <span>x trestán pro</span> <input type="text" id="tpl_cin2" class="inline-input" placeholder="Trestný čin" style="flex:1;">
+                </div>
+                <p style="margin-top: 30px;">Děkuji,<br>S pozdravem<br><b id="tpl_zpracoval" style="color:#60a5fa;"></b></p>
+                <button class="btn-copy" onclick="generateAndCopyNesouhlas()">Zkopírovat hlášení do schránky</button>
             </div>
-
         </div>
+    </div>
 
+    <div id="mapSection">
+        <div id="mapContainer">
+            <img id="mapImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Los_Santos_Map.svg/1024px-Los_Santos_Map.svg.png" alt="Mapa">
+        </div>
+        <div class="map-controls">
+            <button class="map-btn" onclick="zoomMapBtn(0.2)">+</button>
+            <button class="map-btn" onclick="zoomMapBtn(-0.2)">-</button>
+            <button class="map-btn" style="font-size: 14px; width:auto; padding:0 10px;" onclick="resetMap()">Reset</button>
+        </div>
     </div>
 
 </div>
 
 <script>
+/* =========================================
+   1. STAV APLIKACE A AUTENTIZACE
+========================================= */
+let currentUser = null;
 
-/* =========================
-   APP STATE
-========================= */
-
-const appState = {
-
-    officer: null,
-
-    laws: [
-        {
-            name: "Trestní zákoník",
-            url: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf"
+function checkAuth() {
+    const savedUser = localStorage.getItem("sasp_user");
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainApp").style.display = "flex";
+        
+        const fullName = `${currentUser.rank} ${currentUser.fName} ${currentUser.lName}`;
+        document.getElementById("loggedInUser").innerText = "👤 " + fullName;
+        
+        if (document.getElementById("tpl_zpracoval")) {
+            document.getElementById("tpl_zpracoval").innerText = fullName;
+            document.getElementById("tpl_datum").value = new Date().toLocaleDateString("cs-CZ");
         }
-    ],
-
-    searchIndex: []
-
+        
+        renderLaws();
+    } else {
+        document.getElementById("loginScreen").style.display = "flex";
+        document.getElementById("mainApp").style.display = "none";
+    }
 }
 
-/* =========================
-   SYNONYMS
-========================= */
+function performLogin() {
+    const rank = document.getElementById("loginRank").value;
+    const fName = document.getElementById("loginFName").value.trim();
+    const lName = document.getElementById("loginLName").value.trim();
 
-const legalSynonyms = {
-
-    "domovní prohlídka": [
-        "vstup do obydlí",
-        "obydlí",
-        "prohlídka"
-    ],
-
-    "vydírání": [
-        "nátlak",
-        "vyhrožování",
-        "donucení"
-    ]
-
-}
-
-/* =========================
-   LOGIN
-========================= */
-
-function login(){
-
-    const name = document.getElementById("officerName").value.trim()
-
-    const rank = document.getElementById("officerRank").value
-
-    if(!name){
-        alert("Vyplň jméno")
-        return
+    if (!fName || !lName) {
+        alert("Zadejte jméno a příjmení.");
+        return;
     }
 
-    appState.officer = {
-        name,
-        rank
+    const user = { rank, fName, lName };
+    localStorage.setItem("sasp_user", JSON.stringify(user));
+    checkAuth();
+}
+
+function logout() {
+    localStorage.removeItem("sasp_user");
+    checkAuth();
+}
+
+window.onload = checkAuth;
+
+/* =========================================
+   2. PŘEPÍNÁNÍ ZÁLOŽEK A MAPA
+========================================= */
+function switchTab(tabId) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById('tab-' + tabId);
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    ['pdfSection', 'templatesSection', 'mapSection'].forEach(s => {
+        const panel = document.getElementById(s);
+        if (panel) panel.style.display = 'none';
+    });
+    
+    const targetPanel = document.getElementById(tabId);
+    if (targetPanel) {
+        targetPanel.style.display = 'flex';
     }
-
-    localStorage.setItem(
-        "mdtOfficer",
-        JSON.stringify(appState.officer)
-    )
-
-    document.getElementById("officerDisplay").textContent =
-        `${rank} | ${name}`
-
-    document.getElementById("loginScreen").style.display = "none"
-
-    document.getElementById("app").style.display = "flex"
-
 }
 
-/* AUTO LOGIN */
-
-const savedOfficer = localStorage.getItem("mdtOfficer")
-
-if(savedOfficer){
-
-    appState.officer = JSON.parse(savedOfficer)
-
-    document.getElementById("officerDisplay").textContent =
-        `${appState.officer.rank} | ${appState.officer.name}`
-
-    document.getElementById("loginScreen").style.display = "none"
-
-    document.getElementById("app").style.display = "flex"
-
+function loadPdf(url, pageNum = null) {
+    // Pokud je předána stránka, přidá se na konec URL jako parametr
+    const finalUrl = pageNum ? `${url}#page=${pageNum}` : url;
+    document.getElementById('pdfFrame').src = finalUrl;
 }
 
-/* =========================
-   TABS
-========================= */
+// Blbuvzdorné ovládání mapy pro všechny typy prohlížečů
+let scale = 1, panning = false, pointX = 0, pointY = 0, startX = 0, startY = 0;
+const mapContainer = document.getElementById("mapContainer");
+const mapImage = document.getElementById("mapImage");
 
-function switchPage(pageId, btn){
-
-    document.querySelectorAll(".page")
-        .forEach(p => p.classList.remove("active"))
-
-    document.querySelectorAll(".tab-btn")
-        .forEach(b => b.classList.remove("active"))
-
-    document.getElementById(pageId)
-        .classList.add("active")
-
-    btn.classList.add("active")
-
+function setTransform() { 
+    mapImage.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; 
 }
 
-/* =========================
-   SEARCH
-========================= */
+mapContainer.onmousedown = (e) => { e.preventDefault(); panning = true; startX = e.clientX - pointX; startY = e.clientY - pointY; };
+mapContainer.onmouseup = () => panning = false; 
+mapContainer.onmouseleave = () => panning = false;
+mapContainer.onmousemove = (e) => { if (!panning) return; e.preventDefault(); pointX = e.clientX - startX; pointY = e.clientY - startY; setTransform(); };
 
-const sampleData = [
+mapContainer.onwheel = (e) => { 
+    e.preventDefault(); 
+    const xs = (e.clientX - pointX)/scale; 
+    const ys = (e.clientY - pointY)/scale; 
+    
+    const zoomIn = e.deltaY ? e.deltaY < 0 : e.wheelDelta > 0;
+    
+    if (zoomIn) scale *= 1.2; else scale /= 1.2;
+    if(scale < 0.2) scale = 0.2; 
+    if(scale > 10) scale = 10; 
+    
+    pointX = e.clientX - xs*scale; pointY = e.clientY - ys*scale; 
+    setTransform(); 
+};
 
+function zoomMapBtn(a) { scale += a; if(scale < 0.2) scale = 0.2; if(scale > 10) scale = 10; setTransform(); }
+function resetMap() { scale = 1; pointX = 0; pointY = 0; setTransform(); }
+
+/* =========================================
+   3. GENERÁTOR HLÁŠENÍ
+========================================= */
+function generateAndCopyNesouhlas() {
+    const finalReport = `Vážený @Soudce / @Statni zastupce tímto žádám o vyjádření k rozhodnutí ve věci zkráceného řízení:
+
+Osoba: ${document.getElementById("tpl_osoba").value} (DOB: ${document.getElementById("tpl_dob").value})
+nesouhlasí s rozhodnutím pro: ${document.getElementById("tpl_cin1").value}.
+
+Výše uvedený(á) dne ${document.getElementById("tpl_datum").value} kolem ${document.getElementById("tpl_cas").value}:
+${document.getElementById("tpl_popis").value}
+
+Důvod nesouhlasu s trestem:
+${document.getElementById("tpl_duvod").value}
+
+Důkazní prostředky:
+${document.getElementById("tpl_dukazy").value}
+
+Výpis z rejstříku: byl již ${document.getElementById("tpl_pocet").value}x trestán pro ${document.getElementById("tpl_cin2").value}.
+
+Děkuji,
+S pozdravem
+${currentUser.rank} ${currentUser.fName} ${currentUser.lName}`;
+
+    navigator.clipboard.writeText(finalReport).then(() => {
+        alert("Hlášení bylo úspěšně zkopírováno. Můžete vložit (Ctrl+V).");
+    }).catch(err => alert("Chyba při kopírování: " + err));
+}
+
+/* =========================================
+   4. CHYTRÝ VYHLEDÁVAČ ZÁKONŮ (VČETNĚ STRAN)
+========================================= */
+
+// Upravená databáze: icon, lawSource, page (strana pro skok v PDF)
+const lawDatabase = [
     {
-        law: "Trestní zákoník",
-        page: 45,
-        text: "Domovní prohlídka může být provedena..."
+        title: "Domovní prohlídka",
+        paragraph: "§ 83",
+        lawSource: "Trestní řád",
+        icon: "🚨",
+        pdfUrl: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf",
+        page: 15, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
+        synonyms: ["razie", "prohlídka bytu", "vstup do domu", "beranidlo"],
+        desc: "Nařízení a výkon domovní prohlídky a osobní prohlídky."
     },
-
     {
-        law: "Trestní zákoník",
-        page: 88,
-        text: "Vstup do obydlí bez souhlasu..."
+        title: "Vstup do obydlí",
+        paragraph: "§ 40",
+        lawSource: "Zákon o policii",
+        icon: "📘",
+        pdfUrl: "https://www.enjoyrp.cz/zakonnik/15-2001-Zákon%20o%20Los%20Santos%20Police%20Department.pdf",
+        page: 8, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
+        synonyms: ["vniknutí", "prohlídka", "vstup do bytu", "záchrana života"],
+        desc: "Oprávnění policisty vstoupit do obydlí bez souhlasu z důvodu ohrožení života nebo stíhání."
     },
-
     {
-        law: "Trestní zákoník",
-        page: 140,
-        text: "Vydírání a psychický nátlak..."
+        title: "Vydírání",
+        paragraph: "§ 175",
+        lawSource: "Trestní zákoník",
+        icon: "🚨",
+        pdfUrl: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf",
+        page: 40, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
+        synonyms: ["nátlak", "vyhrožování", "výhružky", "výkupné", "donucení"],
+        desc: "Kdo jiného násilím, pohrůžkou násilí nebo jiné těžké újmy nutí, aby něco konal, opominul nebo trpěl."
+    },
+    {
+        title: "Ublížení na zdraví",
+        paragraph: "§ 146",
+        lawSource: "Trestní zákoník",
+        icon: "🚨",
+        pdfUrl: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf",
+        page: 35, // DOPLNIT PŘESNOU STRÁNKU PODLE PDF
+        synonyms: ["bouračka", "zranění", "nehoda", "přejetí", "napadnutí", "rvačka", "pěstmi"],
+        desc: "Kdo jinému úmyslně ublíží na zdraví."
+    }
+];
+
+const manualPdfs = [
+    { name: "Ústava San Andreaské republiky", url: "https://www.enjoyrp.cz/zakonnik/1-2001-Ústava%20San%20Andreaské%20republiky.pdf" },
+    { name: "Listina základních práv a svobod", url: "https://www.enjoyrp.cz/zakonnik/2-2001-Listina%20základních%20práv%20a%20svobod.pdf" },
+    { name: "Zákon o soudech a státním návladním", url: "https://www.enjoyrp.cz/zakonnik/3-2001-Zákon%20o%20soudech%20a%20úřadu%20státního%20návladního.pdf" },
+    { name: "Služební poměr bezp. sborů", url: "https://www.enjoyrp.cz/zakonnik/4-2001-Zákon%20o%20služebním%20poměru%20příslušníků%20bezpečnostních%20sborů.pdf" },
+    { name: "Občanský zákoník", url: "https://www.enjoyrp.cz/zakonnik/5-2026-Občanský%20zákoník.pdf" },
+    { name: "Zákon o zbraních a střelivu", url: "https://www.enjoyrp.cz/zakonnik/6-2026-Zákon%20o%20zbraních%20a%20střelivu.pdf" },
+    { name: "Zákon o LSFD", url: "https://www.enjoyrp.cz/zakonnik/7-2001-Zákon%20o%20Los%20Santos%20Fire%20Department.pdf" },
+    { name: "Zákon o SAMS a zdravotní péči", url: "https://www.enjoyrp.cz/zakonnik/8-2001-Zákon%20o%20správě%20San%20Andreas%20Medical%20Services%20a%20zdravotní%20péče%20občanům%20státu%20San%20Andreas.pdf" },
+    { name: "Zákon o námořní bezpečnosti", url: "https://www.enjoyrp.cz/zakonnik/9-2001-Zákon%20o%20námořní%20bezpečnosti.pdf" },
+    { name: "Zákon o letectví a vzdušném prostoru", url: "https://www.enjoyrp.cz/zakonnik/10-2001-Zákon%20o%20letectví%20a%20vzdušném%20prostoru.pdf" },
+    { name: "Zákon o podnikání", url: "https://www.enjoyrp.cz/zakonnik/11-2001-Zákon%20o%20podnikání%20v%20soukromém%20a%20veřejném%20právu.pdf" },
+    { name: "Zákon o advokacii", url: "https://www.enjoyrp.cz/zakonnik/12-2001-Zákon%20o%20advokacii.pdf" },
+    { name: "Silniční provoz na komunikacích", url: "https://www.enjoyrp.cz/zakonnik/13-2001-Zákon%20o%20bezpečnosti%20a%20provozu%20na%20pozemních%20komunikacích.pdf" },
+    { name: "Trestní zákoník a řád", url: "https://www.enjoyrp.cz/zakonnik/14-2001-Trestní%20zákoník%20a%20řád.pdf" },
+    { name: "Zákon o LSPD", url: "https://www.enjoyrp.cz/zakonnik/15-2001-Zákon%20o%20Los%20Santos%20Police%20Department.pdf" },
+    { name: "Zákon o LSSD", url: "https://www.enjoyrp.cz/zakonnik/16-2001-Zákon%20o%20Los%20Santos%20Sheriff%27s%20Department.pdf" },
+    { name: "O omamných a psychotropních látkách", url: "https://www.enjoyrp.cz/zakonnik/17-2001-Zákon%20o%20omamných%20a%20psychotropních%20látkách.pdf" }
+];
+
+function removeDiacritics(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function renderLaws() {
+    const searchInput = removeDiacritics(document.getElementById("lawSearch").value);
+    const resultsDiv = document.getElementById("lawResultsList");
+    resultsDiv.innerHTML = "";
+
+    const manualDiv = document.getElementById("manualPdfList");
+    manualDiv.innerHTML = "";
+    manualPdfs.forEach(pdf => {
+        manualDiv.innerHTML += `<button class="pdf-btn" onclick="loadPdf('${pdf.url}')">📄 ${pdf.name}</button>`;
+    });
+
+    if (searchInput.length === 0) {
+        resultsDiv.innerHTML = `<p style="color:#64748b; font-size:12px; font-style:italic;">Napište hledaný pojem. Můžete použít i běžné výrazy jako 'domovní prohlídka', 'razie' atd.</p>`;
+        return;
     }
 
-]
-
-document
-    .getElementById("lawSearch")
-    .addEventListener("input", debounce(searchLaws, 300))
-
-function searchLaws(e){
-
-    const query = e.target.value
-        .trim()
-        .toLowerCase()
-
-    const resultsEl = document.getElementById("results")
-
-    resultsEl.innerHTML = ""
-
-    if(!query) return
-
-    const expanded = [
-        query,
-        ...(legalSynonyms[query] || [])
-    ]
-
-    const results = sampleData.filter(item => {
-
-        return expanded.some(term =>
-            item.text.toLowerCase().includes(term)
-        )
-
-    })
-
-    results.forEach(result => {
-
-        const div = document.createElement("div")
-
-        div.className = "result"
-
-        div.innerHTML = `
-            <div class="result-law">
-                ${result.law}
-            </div>
-
-            <div>
-                ${result.text}
-            </div>
-
-            <div class="result-page">
-                Strana ${result.page}
-            </div>
-        `
-
-        div.onclick = () => {
-
-            document.getElementById("pdfViewer").src =
-                `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(appState.laws[0].url)}#page=${result.page}`
-
-        }
-
-        resultsEl.appendChild(div)
-
-    })
-
-}
-
-/* =========================
-   REPORTS
-========================= */
-
-function generateReport(){
-
-    const suspect =
-        document.getElementById("suspectName").value
-
-    const reason =
-        document.getElementById("reason").value
-
-    const date =
-        new Date().toLocaleDateString("cs-CZ")
-
-    const officer =
-        appState.officer.name
-
-    const text =
-
-`Já, Officer ${officer},
-dne ${date},
-
-nesouhlasím s uloženým trestem vůči osobě ${suspect}.
-
-Odůvodnění:
-${reason}`
-
-    document.getElementById("generatedReport")
-        .textContent = text
-
-}
-
-function copyReport(){
-
-    const text =
-        document.getElementById("generatedReport")
-        .textContent
-
-    navigator.clipboard.writeText(text)
-
-    alert("Zkopírováno")
-
-}
-
-/* =========================
-   MAP
-========================= */
-
-const map = document.getElementById("mapImage")
-
-let scale = 1
-let pos = { x: 0, y: 0 }
-
-let dragging = false
-
-let startX = 0
-let startY = 0
-
-map.addEventListener("mousedown", e => {
-
-    dragging = true
-
-    startX = e.clientX - pos.x
-    startY = e.clientY - pos.y
-
-})
-
-window.addEventListener("mouseup", () => {
-
-    dragging = false
-
-})
-
-window.addEventListener("mousemove", e => {
-
-    if(!dragging) return
-
-    pos.x = e.clientX - startX
-    pos.y = e.clientY - startY
-
-    updateMap()
-
-})
-
-window.addEventListener("wheel", e => {
-
-    scale += e.deltaY * -0.001
-
-    scale = Math.min(Math.max(0.5, scale), 4)
-
-    updateMap()
-
-})
-
-function updateMap(){
-
-    map.style.transform =
-        `translate(${pos.x}px, ${pos.y}px) scale(${scale})`
-
-}
-
-updateMap()
-
-/* =========================
-   UTIL
-========================= */
-
-function debounce(fn, delay){
-
-    let timeout
-
-    return (...args) => {
-
-        clearTimeout(timeout)
-
-        timeout = setTimeout(() => {
-            fn(...args)
-        }, delay)
-
+    const filteredLaws = lawDatabase.filter(law => {
+        const matchTitle = removeDiacritics(law.title).includes(searchInput);
+        const matchDesc = removeDiacritics(law.desc).includes(searchInput);
+        const matchSynonyms = law.synonyms.some(syn => removeDiacritics(syn).includes(searchInput));
+        return matchTitle || matchDesc || matchSynonyms;
+    });
+
+    if (filteredLaws.length === 0) {
+        resultsDiv.innerHTML = `<p style="color:#fca5a5; font-size:13px;">Tento pojem nebyl v rejstříku nalezen.</p>`;
+        return;
     }
 
-}
+    // Nový design podle tvého návrhu
+    filteredLaws.forEach(law => {
+        const card = document.createElement("div");
+        card.className = "smart-result";
+        
+        // Předáváme URL a konkrétní číslo stránky do funkce loadPdf
+        card.onclick = () => loadPdf(law.pdfUrl, law.page);
 
+        card.innerHTML = `
+            <div class="smart-source">${law.icon} ${law.lawSource}</div>
+            <div class="smart-title">${law.paragraph} ${law.title}</div>
+            ${law.desc ? `<div class="smart-desc">${law.desc}</div>` : ''}
+        `;
+        resultsDiv.appendChild(card);
+    });
+}
 </script>
-
 </body>
 </html>
